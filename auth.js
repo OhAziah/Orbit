@@ -76,6 +76,11 @@ async function connect(session) {
       if (result.data?.error) throw new Error(result.data.error);
       return result.data;
     },
+    takeWelcome: async () => {
+      const { data, error } = await client.functions.invoke("orbit-admin", { body: { action: "consume-welcome" } });
+      if (error) throw error;
+      return data?.welcome || null;
+    },
     refresh: async () => {
       const result = await client.from("reminders").select("*").order("reminder_date");
       if (result.error) throw result.error;
