@@ -10,7 +10,7 @@
   "theme_color": "#626871",
   "icons": [
     {
-      "src": "./orbit-icon-neutral.svg?v=orbit-20",
+      "src": "./orbit-icon-neutral.svg?v=orbit-21",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any maskable"
