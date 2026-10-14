@@ -20,6 +20,12 @@ function toRow(item, userId) {
     amount: item.amount ?? null, paid: !!item.paid, updated_at: new Date().toISOString() };
 }
 async function connect(session) {
+  const { data: verifiedSession, error: sessionError } = await client.auth.getUser(session.access_token);
+  if (sessionError || !verifiedSession.user) {
+    await client.auth.signOut({ scope: "local" }).catch(() => {});
+    throw new Error("Your session has expired or was signed out elsewhere. Please sign in again.");
+  }
+  session = { ...session, user: verifiedSession.user };
   const { data: accessStatus, error: accessError } = await client
     .from("orbit_blocked_users").select("user_id").maybeSingle();
   if (accessError) throw accessError;
@@ -57,13 +63,22 @@ async function connect(session) {
       const { data, error } = await client.functions.invoke("orbit-admin", { body: payload });
       if (error) {
         let message = error.message || "Administrator request failed.";
+        let sessionExpired = false;
         try {
           const response = error.context;
           if (response instanceof Response) {
+            sessionExpired = response.status === 401;
             const body = await response.clone().json();
             if (body.error) message = body.error;
           }
         } catch {}
+        if (sessionExpired) {
+          await client.auth.signOut({ scope: "local" }).catch(() => {});
+          window.orbitSync = null;
+          gate.hidden = false;
+          shell.hidden = true;
+          showMessage("Your session has expired or was signed out elsewhere. Please sign in again.");
+        }
         throw new Error(message);
       }
       return data;
