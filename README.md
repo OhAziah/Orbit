@@ -10,10 +10,10 @@ A personal reminders and bills dashboard that syncs across devices through Supab
 - Recurring reminders and categories
 - Search and category/status filters
 - Monthly bills total and paid/unpaid tracking
-- Light, dark, and device-matched themes with accent colours
+- Light, dark, and device-matched themes with ten accent colours
 - Private JSON backup export and reminder import
 - Keyboard shortcuts for search and quick add
-- Responsive layout for desktop and mobile
+- Responsive layout with phone-friendly navigation, dialogs, and forms
 
 ## Connect Supabase
 
