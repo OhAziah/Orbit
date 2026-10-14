@@ -63,6 +63,15 @@ async function connect(session) {
       }, { onConflict: "endpoint" });
       if (result.error) throw result.error;
     },
+    loadDashboardPreferences: async () => {
+      const { data, error } = await client.from("orbit_dashboard_preferences").select("preferences").eq("user_id", session.user.id).maybeSingle();
+      if (error) throw error;
+      return data?.preferences || null;
+    },
+    saveDashboardPreferences: async preferences => {
+      const result = await client.from("orbit_dashboard_preferences").upsert({ user_id: session.user.id, preferences, updated_at: new Date().toISOString() }, { onConflict: "user_id" });
+      if (result.error) throw result.error;
+    },
     removePushSubscription: async endpoint => {
       const result = await client.from("orbit_push_subscriptions").delete()
         .eq("endpoint", endpoint).eq("user_id", session.user.id);
