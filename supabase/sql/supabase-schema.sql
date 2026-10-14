@@ -10,6 +10,9 @@ create table if not exists public.reminders (
   done boolean not null default false,
   amount numeric(12,2) check (amount is null or amount >= 0),
   paid boolean not null default false,
+  series_id uuid,
+  series_start date,
+  series_index integer check (series_index is null or series_index >= 0),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
