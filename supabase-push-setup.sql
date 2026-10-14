@@ -2,10 +2,7 @@
 -- and must never be committed to the public GitHub repository.
 create extension if not exists pg_cron with schema pg_catalog;
 create extension if not exists pg_net;
-revoke all on schema net from public, anon, authenticated, service_role;
-revoke all on all functions in schema net from public, anon, authenticated, service_role;
-revoke all on all tables in schema net from public, anon, authenticated, service_role;
-revoke all on all sequences in schema net from public, anon, authenticated, service_role;
+-- pg_net is a Supabase-managed extension; its grants are controlled by its extension owner.
 
 create table if not exists public.orbit_push_subscriptions (
   endpoint text primary key check (endpoint like 'https://%'),
