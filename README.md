@@ -36,7 +36,7 @@ Downloaded backups are **unencrypted JSON files** that contain your reminder det
 
 ---
 
-## For project maintainers
+## For developers
 
 Orbit is a static web app built with HTML, CSS, and JavaScript. Supabase provides authentication and data storage.
 
