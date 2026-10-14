@@ -13,6 +13,7 @@ Orbit is a personal dashboard for the little things you need to remember. Add a 
 - **Keep bills in view** with monthly totals and paid or unpaid status. Orbit tracks reminders; it doesn’t make payments.
 - **Make Orbit yours** with light and dark themes, accent colours, a custom colour, and a dashboard layout you can rearrange.
 - **Use it on your phone** with responsive navigation, forms, and calendar views.
+- **Get reminders while Orbit is closed** with optional push notifications on devices and browsers that support them.
 - **Keep a backup** by exporting your reminders to a JSON file and importing it later.
 
 ## Getting started
@@ -21,10 +22,15 @@ Orbit is a personal dashboard for the little things you need to remember. Add a 
 2. Create an account or sign in.
 3. Add a reminder with a title, date, and category. For a bill, choose the Money category and add an amount.
 4. Sign in to the same account on another device to access your synced reminders.
+5. Open **Theme & settings → Notifications** on each device and choose **Enable notifications**. Use **Send test notification** to confirm delivery. A reminder without a time is sent at 9:00 am in that device’s time zone.
+
+On iPhone or iPad, add Orbit to your Home Screen first, then enable notifications from the installed app. Push support on iPhone and iPad requires iOS 16.4 or later.
 
 ## Your data and privacy
 
 Your reminders are stored in Orbit’s Supabase database, not in this GitHub repository. Signed-in users can access only their own reminders. Appearance and dashboard layout preferences are saved on the device you’re using.
+
+Push is opt-in and set up separately on each device. Orbit stores the browser’s push subscription and time zone with your account so it can deliver reminders while the app is closed. A notification shows the reminder title on your lock screen; it does not include notes or bill amounts. Turning notifications off removes that device’s subscription. Signing out also turns them off on that device.
 
 Downloaded backups are **unencrypted JSON files** that contain your reminder details. Keep them somewhere private. Orbit is a reminder tool, not a bank or payment service.
 
@@ -36,7 +42,7 @@ Downloaded backups are **unencrypted JSON files** that contain your reminder det
 
 ---
 
-## For developers
+## For project maintainers
 
 Orbit is a static web app built with HTML, CSS, and JavaScript. Supabase provides authentication and data storage.
 
@@ -61,4 +67,15 @@ The site’s code is public when hosted from a public repository. Reminder conte
 The `orbit-admin` Edge Function checks the signed-in user against the private administrator registry before returning account information or changing access. It uses a server-side secret and must be deployed with JWT verification enabled; never put that secret in `config.js` or the repository.
 
 For a fresh project, create the first account, run `supabase-admin-setup.sql`, and deploy `supabase/functions/orbit-admin/index.ts` with JWT verification enabled.
+
+### Set up push notifications
+
+The live Orbit project has push notifications configured. For a fresh project:
+
+1. Run `supabase-push-setup.sql` to install the scheduler extensions and create the private push tables.
+2. Deploy `supabase/functions/orbit-push/index.ts`. This function validates user sessions for test sends and validates a separate private token for scheduled sends, so it must be deployed with JWT verification disabled.
+3. Generate a VAPID key pair, add its public key to `config.js`, then store the project URL, publishable key, public and private VAPID keys, and a random scheduler token in the service-only `orbit_push_config` table. Keep the private VAPID key and scheduler token out of GitHub.
+4. Run `supabase-push-schedule.sql` to check for due reminders every minute.
+
+The push setup uses a one-minute scheduler and the project’s existing Supabase database and Edge Functions. Supabase usage limits still apply.
 
