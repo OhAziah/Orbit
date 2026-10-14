@@ -4,8 +4,8 @@ self.addEventListener("push", (event) => {
   const title = typeof payload.title === "string" ? payload.title : "Orbit reminder";
   const options = {
     body: typeof payload.body === "string" ? payload.body : "You have a reminder due.",
-    icon: "./orbit-icon-neutral.svg?v=orbit-20",
-    badge: "./orbit-icon-neutral.svg?v=orbit-20",
+    icon: "./orbit-icon-neutral.svg?v=orbit-21",
+    badge: "./orbit-icon-neutral.svg?v=orbit-21",
     tag: typeof payload.tag === "string" ? payload.tag : "orbit-reminder",
     data: { url: typeof payload.url === "string" ? payload.url : "./" },
     renotify: false,
