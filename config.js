@@ -1,6 +1,7 @@
 // Safe to publish: these are public client settings. Never put a Supabase secret key here.
 window.ORBIT_CONFIG = {
   supabaseUrl: "https://nqwekbuqtegftslggvyq.supabase.co",
-  publishableKey: "sb_publishable_W7sRrOlH8ZBcTp2TglYBcA_e_5rYyoV"
+  publishableKey: "sb_publishable_W7sRrOlH8ZBcTp2TglYBcA_e_5rYyoV",
+  vapidPublicKey: "BLz9zY_-SYJv09Wy85Klx41wf6zBqBc9VTXT_3HqSXCCSP9nYVS-0WTARarGQ0EdXMPaPU5kxBZx5JBJBp0sMDI"
 };
 
