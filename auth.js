@@ -20,6 +20,13 @@ function toRow(item, userId) {
     amount: item.amount ?? null, paid: !!item.paid, updated_at: new Date().toISOString() };
 }
 async function connect(session) {
+  const { data: accessStatus, error: accessError } = await client
+    .from("orbit_blocked_users").select("user_id").maybeSingle();
+  if (accessError) throw accessError;
+  if (accessStatus) {
+    await client.auth.signOut({ scope: "local" });
+    throw new Error("This account's Orbit access is suspended. Contact the administrator.");
+  }
   const { data, error } = await client.from("reminders").select("*").order("reminder_date");
   if (error) throw error;
   window.orbitSync = {
