@@ -13,12 +13,12 @@ window.orbitReady = new Promise(resolve => { resolveReady = resolve; });
 function showMessage(text) { message.textContent = text; }
 function mapRow(row) {
   return { id: row.id, title: row.title, date: row.reminder_date, time: row.reminder_time || "", category: row.category,
-    repeat: row.repeat_rule, notes: row.notes || "", done: row.done, ...(row.amount == null ? {} : { amount: Number(row.amount), paid: row.paid }) };
+    repeat: row.repeat_rule, notes: row.notes || "", done: row.done, ...(row.amount == null ? {} : { amount: Number(row.amount), paid: row.paid }), ...(row.series_id ? { seriesId: row.series_id, seriesStart: row.series_start || row.reminder_date, seriesIndex: Number(row.series_index || 0) } : {}) };
 }
 function toRow(item, userId) {
   return { id: item.id, user_id: userId, title: item.title, reminder_date: item.date, reminder_time: item.time || null,
     category: item.category, repeat_rule: item.repeat || "none", notes: item.notes || "", done: !!item.done,
-    amount: item.amount ?? null, paid: !!item.paid, updated_at: new Date().toISOString() };
+    amount: item.amount ?? null, paid: !!item.paid, series_id: item.seriesId || null, series_start: item.seriesStart || null, series_index: Number.isInteger(item.seriesIndex) ? item.seriesIndex : null, updated_at: new Date().toISOString() };
 }
 async function connect(session) {
   const { data: verifiedSession, error: sessionError } = await client.auth.getUser(session.access_token);
