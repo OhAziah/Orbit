@@ -68,6 +68,8 @@ The `orbit-admin` Edge Function checks the signed-in user against the private ad
 
 For a fresh project, create the first account, run `supabase-admin-setup.sql`, and deploy `supabase/functions/orbit-admin/index.ts` with JWT verification enabled.
 
+The Admin page can queue a one-time welcome greeting for an email address. Run `supabase-welcome-setup.sql` before deploying the updated function. The target email and message are stored in a private Supabase table, never in the public frontend. After the recipient signs in, the server removes the queued message and Orbit displays it once.
+
 ### Set up push notifications
 
 The live Orbit project has push notifications configured. For a fresh project:
