@@ -7,9 +7,14 @@
   "scope": "./",
   "display": "standalone",
   "background_color": "#f4f5f7",
-  "theme_color": "#3569e8",
+  "theme_color": "#626871",
   "icons": [
-    { "src": "./orbit-icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+    {
+      "src": "./orbit-icon-neutral.svg?v=orbit-20",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
   ]
 }
 
