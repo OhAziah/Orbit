@@ -10,6 +10,9 @@ A personal reminders and bills dashboard that syncs across devices through Supab
 - Recurring reminders and categories
 - Search and category/status filters
 - Monthly bills total and paid/unpaid tracking
+- Light, dark, and device-matched themes with accent colours
+- Private JSON backup export and reminder import
+- Keyboard shortcuts for search and quick add
 - Responsive layout for desktop and mobile
 
 ## Connect Supabase
@@ -23,6 +26,8 @@ A personal reminders and bills dashboard that syncs across devices through Supab
 The publishable key is intended for browser use. Never put a Supabase secret or service-role key in this repository. The reminders table has row-level security enabled and each signed-in user can access only their own rows. Do not disable those policies.
 
 The website and source are public when hosted on GitHub Pages from a public repository. Reminder contents are stored in Supabase, not committed to this repository. Email verification and password policies can be configured in Supabase Auth. The free Supabase tier may pause inactive projects.
+
+Appearance preferences are saved on the current device. Backups are unencrypted JSON files containing reminder details; store them somewhere private.
 
 ## Publish with GitHub Pages
 
