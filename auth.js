@@ -47,6 +47,35 @@ async function connect(session) {
       const result = await client.from("reminders").delete().eq("id", id);
       if (result.error) throw result.error;
     },
+    savePushSubscription: async (subscription, timeZone) => {
+      if (!subscription?.endpoint || !subscription.keys?.p256dh || !subscription.keys?.auth) throw new Error("The browser returned an invalid push subscription.");
+      const result = await client.from("orbit_push_subscriptions").upsert({
+        endpoint: subscription.endpoint, user_id: session.user.id,
+        p256dh: subscription.keys.p256dh, auth: subscription.keys.auth,
+        time_zone: timeZone || "UTC", updated_at: new Date().toISOString(),
+      }, { onConflict: "endpoint" });
+      if (result.error) throw result.error;
+    },
+    removePushSubscription: async endpoint => {
+      const result = await client.from("orbit_push_subscriptions").delete()
+        .eq("endpoint", endpoint).eq("user_id", session.user.id);
+      if (result.error) throw result.error;
+    },
+    sendTestPush: async () => {
+      const result = await client.functions.invoke("orbit-push", { body: { action: "test" } });
+      if (result.error) {
+        let message = result.error.message || "Could not send the test notification.";
+        try {
+          if (result.error.context instanceof Response) {
+            const body = await result.error.context.clone().json();
+            if (body.error) message = body.error;
+          }
+        } catch {}
+        throw new Error(message);
+      }
+      if (result.data?.error) throw new Error(result.data.error);
+      return result.data;
+    },
     refresh: async () => {
       const result = await client.from("reminders").select("*").order("reminder_date");
       if (result.error) throw result.error;
@@ -123,7 +152,18 @@ if (!config.supabaseUrl || !config.publishableKey) {
     document.querySelector("#authMode").textContent = signup ? "Sign in" : "Create an account";
     showMessage("");
   });
-  document.querySelector("#signOut").addEventListener("click", async () => { await client.auth.signOut(); location.reload(); });
+  document.querySelector("#signOut").addEventListener("click", async () => {
+    try {
+      const registration = await navigator.serviceWorker?.getRegistration("./");
+      const subscription = await registration?.pushManager?.getSubscription();
+      if (subscription) {
+        await subscription.unsubscribe();
+        await window.orbitSync?.removePushSubscription(subscription.endpoint);
+      }
+    } catch (error) { console.warn("Could not remove this device's push subscription while signing out.", error); }
+    await client.auth.signOut();
+    location.reload();
+  });
   client.auth.getSession().then(async ({ data, error }) => {
     if (error) { gate.hidden = false; shell.hidden = true; return showMessage(error.message); }
     if (data.session) {
