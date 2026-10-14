@@ -6,6 +6,7 @@ const message = document.querySelector("#authMessage");
 const shell = document.querySelector(".shell");
 const config = window.ORBIT_CONFIG || {};
 let client;
+let pendingConnection = null;
 let resolveReady;
 window.orbitReady = new Promise(resolve => { resolveReady = resolve; });
 
@@ -126,6 +127,13 @@ async function connect(session) {
     .finally(() => window.dispatchEvent(new Event("orbit-admin-ready")));
 }
 
+function ensureConnected(session) {
+  if (window.orbitSync?.userId === session.user?.id) return Promise.resolve(window.orbitSync);
+  if (pendingConnection) return pendingConnection;
+  pendingConnection = connect(session).finally(() => { pendingConnection = null; });
+  return pendingConnection;
+}
+
 if (!config.supabaseUrl || !config.publishableKey) {
   gate.hidden = false;
   shell.hidden = true;
@@ -144,7 +152,7 @@ if (!config.supabaseUrl || !config.publishableKey) {
         : await client.auth.signInWithPassword({ email, password });
       if (result.error) throw result.error;
       if (form.dataset.mode === "signup" && !result.data.session) showMessage("Check your email to confirm your account, then sign in.");
-      else if (result.data.session) await connect(result.data.session);
+      else if (result.data.session) await ensureConnected(result.data.session);
     } catch (error) { showMessage(error.message || "Could not sign in. Please try again."); }
     finally { button.disabled = false; }
   });
@@ -173,11 +181,16 @@ if (!config.supabaseUrl || !config.publishableKey) {
   client.auth.getSession().then(async ({ data, error }) => {
     if (error) { gate.hidden = false; shell.hidden = true; return showMessage(error.message); }
     if (data.session) {
-      try { await connect(data.session); } catch (e) { gate.hidden = false; shell.hidden = true; showMessage(e.message); resolveReady(null); }
+      try { await ensureConnected(data.session); } catch (e) { gate.hidden = false; shell.hidden = true; showMessage(e.message); resolveReady(null); }
     } else { gate.hidden = false; shell.hidden = true; }
   });
-  client.auth.onAuthStateChange((_event, session) => {
-    if (!session) { gate.hidden = false; shell.hidden = true; }
+  client.auth.onAuthStateChange((event, session) => {
+    if (!session) { gate.hidden = false; shell.hidden = true; return; }
+    if (event === "SIGNED_IN" && window.orbitSync?.userId !== session.user.id) {
+      Promise.resolve().then(() => ensureConnected(session)).catch(e => {
+        gate.hidden = false; shell.hidden = true; showMessage(e.message || "Could not open your Orbit account.");
+      });
+    }
   });
   document.addEventListener("visibilitychange", async () => {
     if (document.visibilityState === "visible" && window.orbitSync) {
