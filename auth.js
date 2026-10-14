@@ -102,7 +102,10 @@ if (!config.supabaseUrl || !config.publishableKey) {
     const signup = form.dataset.mode !== "signup";
     form.dataset.mode = signup ? "signup" : "login";
     document.querySelector("#authSubmit").textContent = signup ? "Create account" : "Sign in";
-    document.querySelector("#authMode").textContent = signup ? "Already have an account? Sign in" : "Create an account";
+    document.querySelector("#authTitle").textContent = signup ? "Create your account" : "Sign in to Orbit";
+    document.querySelector("#authSubtitle").textContent = signup ? "A little more room for what matters." : "Pick up right where you left off.";
+    document.querySelector("#authSwitchPrompt").textContent = signup ? "Already have an account?" : "New to Orbit?";
+    document.querySelector("#authMode").textContent = signup ? "Sign in" : "Create an account";
     showMessage("");
   });
   document.querySelector("#signOut").addEventListener("click", async () => { await client.auth.signOut(); location.reload(); });
