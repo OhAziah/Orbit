@@ -42,6 +42,13 @@ Downloaded backups are **unencrypted JSON files** that contain your reminder det
 
 ---
 
+## Repository layout
+
+- `index.html`, `config.js`, `auth.js`, `app.js`, and `push-ui.js` are the GitHub Pages frontend entry points and scripts.
+- `sw.js`, `manifest.webmanifest`, and the Orbit SVG icons stay at the repository root so the installed app and push notifications keep their existing paths and service-worker scope.
+- `supabase/sql/` contains database schema and setup scripts.
+- `supabase/functions/` contains the `orbit-admin` and `orbit-push` Edge Functions.
+
 ## For project maintainers
 
 Orbit is a static web app built with HTML, CSS, and JavaScript. Supabase provides authentication and data storage.
