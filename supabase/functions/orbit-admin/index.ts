@@ -56,13 +56,40 @@ Deno.serve(async (request: Request) => {
     const adminClient = createClient(url, secretKey(), {
       auth: { autoRefreshToken: false, persistSession: false },
     });
+    const payload = await request.json().catch(() => ({}));
+    if (payload.action === "consume-welcome") {
+      const email = (user.email || "").trim().toLowerCase();
+      if (!email) return reply({ welcome: null });
+      const { data: welcome, error } = await adminClient.from("orbit_welcome_messages")
+        .delete().eq("email", email).select("headline,message").maybeSingle();
+      if (error) throw error;
+      return reply({ welcome: welcome || null });
+    }
     const { data: adminRow, error: adminError } = await adminClient
       .from("orbit_admins").select("user_id").eq("user_id", user.id).maybeSingle();
     if (adminError) throw adminError;
     if (!adminRow) return reply({ error: "Administrator access required." }, 403);
 
-    const payload = await request.json().catch(() => ({}));
     if (payload.action === "status") return reply({ admin: true });
+
+    if (payload.action === "set-welcome") {
+      const email = typeof payload.email === "string" ? payload.email.trim().toLowerCase() : "";
+      const headline = typeof payload.headline === "string" ? payload.headline.trim() : "";
+      const message = typeof payload.message === "string" ? payload.message.trim() : "";
+      if (email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return reply({ error: "Enter a valid account email address." }, 400);
+      if (!headline || headline.length > 120 || message.length > 1000) return reply({ error: "A headline (up to 120 characters) and message (up to 1,000 characters) are required." }, 400);
+      const { error } = await adminClient.from("orbit_welcome_messages").upsert({ email, headline, message }, { onConflict: "email" });
+      if (error) return reply({ error: error.message }, 400);
+      return reply({ ok: true });
+    }
+
+    if (payload.action === "delete-welcome") {
+      const email = typeof payload.email === "string" ? payload.email.trim().toLowerCase() : "";
+      if (!email || email.length > 254) return reply({ error: "A valid account email address is required." }, 400);
+      const { error } = await adminClient.from("orbit_welcome_messages").delete().eq("email", email);
+      if (error) return reply({ error: error.message }, 400);
+      return reply({ ok: true });
+    }
 
     if (payload.action === "set-access") {
       if (typeof payload.userId !== "string" || typeof payload.blocked !== "boolean") {
@@ -115,9 +142,13 @@ Deno.serve(async (request: Request) => {
     const { count: reminderCount, error: countError } = await adminClient
       .from("reminders").select("id", { count: "exact", head: true });
     if (countError) throw countError;
+    const { data: welcomeMessages, error: welcomeError } = await adminClient
+      .from("orbit_welcome_messages").select("email,headline,message,created_at").order("created_at", { ascending: false });
+    if (welcomeError) throw welcomeError;
     return reply({
       users: users.map((entry) => ({ ...entry, blocked: blockedIds.has(entry.id) })),
       reminderCount: reminderCount ?? 0,
+      welcomeMessages: welcomeMessages || [],
       checkedAt: new Date().toISOString(),
     });
   } catch (error) {
