@@ -5,6 +5,7 @@ const form = document.querySelector("#authForm");
 const message = document.querySelector("#authMessage");
 const shell = document.querySelector(".shell");
 const config = window.DAYMARK_CONFIG || {};
+let client;
 let resolveReady;
 window.daymarkReady = new Promise(resolve => { resolveReady = resolve; });
 
@@ -51,7 +52,7 @@ if (!config.supabaseUrl || !config.publishableKey) {
   showMessage("Sync is not configured yet. Add the Supabase project URL and publishable key to config.js after project setup.");
   form.hidden = true;
 } else {
-  const client = createClient(config.supabaseUrl, config.publishableKey);
+  client = createClient(config.supabaseUrl, config.publishableKey);
   form.addEventListener("submit", async event => {
     event.preventDefault();
     const button = form.querySelector("button[type=submit]");
