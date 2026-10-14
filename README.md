@@ -17,7 +17,8 @@ A personal reminders and bills dashboard that syncs across devices through Supab
 1. Create a Supabase project and run `supabase-schema.sql` in the SQL editor (or apply it as a migration).
 2. Copy the project URL and publishable key into `config.js`.
 3. Enable email/password authentication in Supabase Auth.
-4. Publish the root folder with GitHub Pages.
+4. In **Authentication → URL Configuration**, set the Site URL to `https://ohaziah.github.io/Orbit/` and add `https://ohaziah.github.io/Orbit/**` to the allowed Redirect URLs so email confirmation returns to the app.
+5. Publish the root folder with GitHub Pages.
 
 The publishable key is intended for browser use. Never put a Supabase secret or service-role key in this repository. The reminders table has row-level security enabled and each signed-in user can access only their own rows. Do not disable those policies.
 
