@@ -43,7 +43,30 @@ async function connect(session) {
   gate.hidden = true;
   shell.hidden = false;
   document.querySelector("#accountEmail").textContent = session.user.email || "Signed in";
+  window.orbitAdmin = {
+    isAdmin: false,
+    checkError: "",
+    call: async payload => {
+      const { data, error } = await client.functions.invoke("orbit-admin", { body: payload });
+      if (error) {
+        let message = error.message || "Administrator request failed.";
+        try {
+          const response = error.context;
+          if (response instanceof Response) {
+            const body = await response.clone().json();
+            if (body.error) message = body.error;
+          }
+        } catch {}
+        throw new Error(message);
+      }
+      return data;
+    }
+  };
   resolveReady(window.orbitSync);
+  window.orbitAdmin.call({ action: "status" })
+    .then(result => { window.orbitAdmin.isAdmin = result?.admin === true; })
+    .catch(error => { window.orbitAdmin.checkError = error.message || "Could not verify admin access."; })
+    .finally(() => window.dispatchEvent(new Event("orbit-admin-ready")));
 }
 
 if (!config.supabaseUrl || !config.publishableKey) {
