@@ -4,10 +4,10 @@ const gate = document.querySelector("#authGate");
 const form = document.querySelector("#authForm");
 const message = document.querySelector("#authMessage");
 const shell = document.querySelector(".shell");
-const config = window.DAYMARK_CONFIG || {};
+const config = window.ORBIT_CONFIG || {};
 let client;
 let resolveReady;
-window.daymarkReady = new Promise(resolve => { resolveReady = resolve; });
+window.orbitReady = new Promise(resolve => { resolveReady = resolve; });
 
 function showMessage(text) { message.textContent = text; }
 function mapRow(row) {
@@ -22,7 +22,7 @@ function toRow(item, userId) {
 async function connect(session) {
   const { data, error } = await client.from("reminders").select("*").order("reminder_date");
   if (error) throw error;
-  window.daymarkSync = {
+  window.orbitSync = {
     userId: session.user.id,
     items: data.map(mapRow),
     save: async items => {
@@ -37,13 +37,13 @@ async function connect(session) {
     refresh: async () => {
       const result = await client.from("reminders").select("*").order("reminder_date");
       if (result.error) throw result.error;
-      window.daymarkSync.items = result.data.map(mapRow);
+      window.orbitSync.items = result.data.map(mapRow);
     }
   };
   gate.hidden = true;
   shell.hidden = false;
   document.querySelector("#accountEmail").textContent = session.user.email || "Signed in";
-  resolveReady(window.daymarkSync);
+  resolveReady(window.orbitSync);
 }
 
 if (!config.supabaseUrl || !config.publishableKey) {
@@ -86,8 +86,8 @@ if (!config.supabaseUrl || !config.publishableKey) {
     if (!session) { gate.hidden = false; shell.hidden = true; }
   });
   document.addEventListener("visibilitychange", async () => {
-    if (document.visibilityState === "visible" && window.daymarkSync) {
-      try { await window.daymarkSync.refresh(); window.dispatchEvent(new Event("daymark-refresh")); } catch (e) { showMessage(e.message); }
+    if (document.visibilityState === "visible" && window.orbitSync) {
+      try { await window.orbitSync.refresh(); window.dispatchEvent(new Event("orbit-refresh")); } catch (e) { showMessage(e.message); }
     }
   });
 }
