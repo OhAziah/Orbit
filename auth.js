@@ -49,6 +49,11 @@ async function connect(session) {
       const result = await client.from("reminders").delete().eq("id", id);
       if (result.error) throw result.error;
     },
+    removeMany: async ids => {
+      if (!Array.isArray(ids) || !ids.length) return;
+      const result = await client.from("reminders").delete().in("id", ids);
+      if (result.error) throw result.error;
+    },
     savePushSubscription: async (subscription, timeZone) => {
       if (!subscription?.endpoint || !subscription.keys?.p256dh || !subscription.keys?.auth) throw new Error("The browser returned an invalid push subscription.");
       const result = await client.from("orbit_push_subscriptions").upsert({
