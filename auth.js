@@ -59,7 +59,7 @@ if (!config.supabaseUrl || !config.publishableKey) {
     try {
       const email = form.elements.email.value.trim(), password = form.elements.password.value;
       const result = form.dataset.mode === "signup"
-        ? await client.auth.signUp({ email, password })
+        ? await client.auth.signUp({ email, password, options: { emailRedirectTo: location.href } })
         : await client.auth.signInWithPassword({ email, password });
       if (result.error) throw result.error;
       if (form.dataset.mode === "signup" && !result.data.session) showMessage("Check your email to confirm your account, then sign in.");
