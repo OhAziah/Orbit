@@ -10,10 +10,11 @@ A personal reminders and bills dashboard that syncs across devices through Supab
 - Recurring reminders and categories
 - Search and category/status filters
 - Monthly bills total and paid/unpaid tracking
-- Light, dark, and device-matched themes with ten accent colours
+- Light, dark, and device-matched themes with ten accent colours plus a custom colour picker
 - Private JSON backup export and reminder import
 - Keyboard shortcuts for search and quick add
-- Responsive layout with phone-friendly navigation, dialogs, and forms
+- Owner-only administration page for account access and app health
+- Responsive layout with phone-friendly navigation, dialogs, and forms; movable and resizable dashboard widgets
 
 ## Connect Supabase
 
@@ -33,3 +34,6 @@ Appearance preferences are saved on the current device. Backups are unencrypted 
 
 In the repository, open **Settings → Pages**, choose **Deploy from a branch**, select `main` and `/ (root)`, then save. The static site will be available at the Pages URL shown on that screen.
 
+## Private administrator setup
+
+The administrator registry and `orbit-admin` Edge Function keep user management on the server. The function validates the signed-in user, checks the private registry, lists accounts, reports reminder totals, and suspension blocks reminder reads and writes immediately, in addition to blocking future sign-ins. It never exposes the Supabase secret key in the browser. The current single account is registered as the owner. To set this up on a fresh project, create your first account and run `supabase-admin-setup.sql`, then deploy `supabase/functions/orbit-admin/index.ts` with JWT verification enabled.
