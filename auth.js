@@ -37,6 +37,7 @@ async function connect(session) {
   if (error) throw error;
   window.orbitSync = {
     userId: session.user.id,
+    userEmail: (session.user.email || "").trim().toLowerCase(),
     items: data.map(mapRow),
     save: async items => {
       if (!items.length) return;
