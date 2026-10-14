@@ -1,0 +1,15 @@
+{
+  "id": "./",
+  "name": "Orbit — Personal dashboard",
+  "short_name": "Orbit",
+  "description": "Your reminders, bills, and everyday plans in one calm place.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f4f5f7",
+  "theme_color": "#3569e8",
+  "icons": [
+    { "src": "./orbit-icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
+
