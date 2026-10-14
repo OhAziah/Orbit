@@ -48,6 +48,7 @@ Downloaded backups are **unencrypted JSON files** that contain your reminder det
 - `sw.js`, `manifest.webmanifest`, and the Orbit SVG icons stay at the repository root so the installed app and push notifications keep their existing paths and service-worker scope.
 - `supabase/sql/` contains database schema and setup scripts.
 - `supabase/functions/` contains the `orbit-admin` and `orbit-push` Edge Functions.
+- `docs/MAINTAINERS.md` contains setup and deployment guidance; `docs/PROJECT-STRUCTURE.md` explains why the published app files remain at the root.
 
 ## Project maintainers
 
