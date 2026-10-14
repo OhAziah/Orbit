@@ -1,6 +1,6 @@
 # Orbit
 
-**Your reminders, bills, and everyday plans—in one calm place.**
+**Your reminders, bills, and everyday plans—in one place.**
 
 [Open Orbit](https://ohaziah.github.io/Orbit/)
 
