@@ -1,8 +1,8 @@
 {
   "id": "./",
-  "name": "Orbit — Personal dashboard",
+  "name": "Orbit — Personal Dashboard",
   "short_name": "Orbit",
-  "description": "Your reminders, bills, and everyday plans in one calm place.",
+  "description": "Your reminders, bills, and everyday plans in one place.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
