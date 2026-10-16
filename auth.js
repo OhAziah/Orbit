@@ -193,6 +193,7 @@ if (!config.supabaseUrl || !config.publishableKey) {
         if (form.dataset.mode === "login" && nickname) {
           const { error: nicknameError } = await client.auth.updateUser({ data: { nickname, full_name: nickname } });
           if (nicknameError) throw nicknameError;
+          try { localStorage.removeItem(`orbit-profile-name-${result.data.user.id}`); } catch {}
         }
         await ensureConnected(result.data.session);
       }
