@@ -42,7 +42,6 @@ async function connect(session) {
     userName: String(session.user.user_metadata?.nickname || session.user.user_metadata?.full_name || session.user.user_metadata?.name || "").trim(),
     saveProfileName: async name => {
       const cleanName = String(name || "").trim().slice(0, 60);
-      if (!cleanName) throw new Error("Please enter a nickname.");
       const { data: updated, error } = await client.auth.updateUser({ data: { nickname: cleanName, full_name: cleanName } });
       if (error) throw error;
       window.orbitSync.userName = String(updated.user?.user_metadata?.nickname || updated.user?.user_metadata?.full_name || "").trim();
