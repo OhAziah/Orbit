@@ -40,6 +40,8 @@
 .widget-resize-tools{display:inline-flex;align-items:center;gap:3px;margin-left:auto}
 .widget-tools button:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
 html.windows-desktop .dashboard-widgets.is-editing .widget-tools{display:flex}
+html.windows-desktop .dashboard-widgets.is-editing .widget-drag{display:inline-flex;align-items:center;justify-content:center;position:relative;z-index:8;min-width:30px;min-height:28px;pointer-events:auto}
+html.widget-drag-active,html.widget-drag-active *{cursor:grabbing!important;user-select:none!important}
 html.windows-desktop .dashboard-widgets.is-editing .panel-head{flex-wrap:wrap}
 html.windows-desktop .dashboard-widgets.is-editing [data-widget]{outline:1px dashed var(--blue);outline-offset:2px}
 html.windows-desktop .dashboard-widgets.is-editing [data-widget].is-dragging{opacity:.72;z-index:6;box-shadow:0 12px 34px #0002}
