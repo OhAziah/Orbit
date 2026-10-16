@@ -39,7 +39,21 @@ async function connect(session) {
   window.orbitSync = {
     userId: session.user.id,
     userEmail: (session.user.email || "").trim().toLowerCase(),
+    userName: String(session.user.user_metadata?.full_name || session.user.user_metadata?.name || session.user.user_metadata?.nickname || "").trim(),
     items: data.map(mapRow),
+    loadNotes: async () => {
+      const { data, error } = await client.from("orbit_notes").select("*").order("updated_at", { ascending: false });
+      if (error) throw error;
+      return (data || []).map(row => ({ id: row.id, title: row.title || "", content: row.content || "", category: row.category || "Personal", pinned: !!row.pinned, createdAt: row.created_at, updatedAt: row.updated_at }));
+    },
+    saveNote: async note => {
+      const result = await client.from("orbit_notes").upsert({ id: note.id, user_id: session.user.id, title: note.title || "", content: note.content, category: note.category || "Personal", pinned: !!note.pinned, created_at: note.createdAt || new Date().toISOString(), updated_at: note.updatedAt || new Date().toISOString() }, { onConflict: "id" });
+      if (result.error) throw result.error;
+    },
+    removeNote: async id => {
+      const result = await client.from("orbit_notes").delete().eq("id", id);
+      if (result.error) throw result.error;
+    },
     save: async items => {
       if (!items.length) return;
       const result = await client.from("reminders").upsert(items.map(item => toRow(item, session.user.id)), { onConflict: "id" });
