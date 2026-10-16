@@ -46,10 +46,40 @@ dashboard.querySelectorAll('[data-widget]').forEach(w=>{const tools=document.cre
 function applyLayoutPreset(p){layoutPrefs.preset=p;layoutPrefs.positions=JSON.parse(JSON.stringify(defaultPositions));if(p==='calendar-focus'){layoutPrefs.positions.calendar.span=12;layoutPrefs.positions.calendar.rows=6;layoutPrefs.positions.agenda.col=1;layoutPrefs.positions.agenda.row=7;layoutPrefs.positions.agenda.span=6;layoutPrefs.positions['monthly-bills'].col=7;layoutPrefs.positions['monthly-bills'].row=7;layoutPrefs.positions['monthly-bills'].span=6;layoutPrefs.positions['quick-notes'].row=11}if(p==='agenda-focus'){layoutPrefs.positions.agenda.span=12;layoutPrefs.positions.agenda.rows=5;layoutPrefs.positions.calendar.col=1;layoutPrefs.positions.calendar.row=6;layoutPrefs.positions.calendar.span=7;layoutPrefs.positions['monthly-bills'].col=8;layoutPrefs.positions['monthly-bills'].row=6;layoutPrefs.positions['quick-notes'].row=12}if(p==='compact'){widgetIds.forEach((id,i)=>{layoutPrefs.positions[id].rows=id==='calendar'?5:2;layoutPrefs.positions[id].row=i*3+1;layoutPrefs.positions[id].col=1;layoutPrefs.positions[id].span=12})}keepWidgetsApart('calendar');applyDashboardLayout();persistLayout();$('#layoutPreset').value=p;toast('Dashboard layout updated')}
 applyDashboardLayout();$('#layoutPreset').value=layoutPrefs.preset;$('#layoutPreset').onchange=e=>applyLayoutPreset(e.target.value);
 $('#layoutToggle').onclick=()=>{if(!isWindowsDesktop()){toast('Widget moving and resizing is available on Windows desktop. Widgets stack automatically on mobile.');return}layoutMode=!layoutMode;dashboard.classList.toggle('is-editing',layoutMode);$('#layoutHint').hidden=!layoutMode;$('#layoutHint').textContent='Drag ⠿ to move a widget. Use −W/+W and −H/+H to resize it. Cards snap to the grid and avoid overlapping.';$('#layoutToggle .side-control-label').textContent=layoutMode?'Done':'Layout';$('#layoutToggle').setAttribute('aria-pressed',String(layoutMode))};
-dashboard.addEventListener('pointerdown',e=>{const handle=e.target.closest('.widget-drag');if(!layoutMode||!isWindowsDesktop()||!handle)return;const w=handle.closest('[data-widget]'),id=w?.dataset.widget;if(!id)return;const p=layoutPrefs.positions[id];dragState={id,pointerId:e.pointerId,startX:e.clientX,startY:e.clientY,startCol:p.col,startRow:p.row,span:p.span};try{handle.setPointerCapture(e.pointerId)}catch{}w.classList.add('is-dragging');e.preventDefault()});
-dashboard.addEventListener('pointermove',e=>{if(!dragState||dragState.pointerId!==e.pointerId)return;const w=dashboard.querySelector('[data-widget="'+dragState.id+'"]');if(w){w.style.transform='translate('+(e.clientX-dragState.startX)+'px,'+(e.clientY-dragState.startY)+'px)';w.style.zIndex='6'}});
-dashboard.addEventListener('pointerup',e=>{if(!dragState||dragState.pointerId!==e.pointerId)return;const s=dragState;dragState=null;const w=dashboard.querySelector('[data-widget="'+s.id+'"]');if(w){w.classList.remove('is-dragging');w.style.removeProperty('transform');w.style.removeProperty('z-index')}const grid=dashboard.getBoundingClientRect(),cols=12,style=getComputedStyle(dashboard),gap=parseFloat(style.columnGap)||16,rowGap=parseFloat(style.rowGap)||16,rowHeight=parseFloat(style.gridAutoRows)||72,colWidth=(grid.width-gap*(cols-1))/cols,rowPitch=rowHeight+rowGap,dx=Math.round((e.clientX-s.startX)/Math.max(colWidth,1)),dy=Math.round((e.clientY-s.startY)/Math.max(rowPitch,1)),p=layoutPrefs.positions[s.id];p.col=Math.max(1,Math.min(13-p.span,s.startCol+dx));p.row=Math.max(1,Math.min(100,s.startRow+dy));savePositionChange(s.id)});
-dashboard.addEventListener('pointercancel',()=>{if(!dragState)return;const w=dashboard.querySelector('[data-widget="'+dragState.id+'"]');if(w){w.classList.remove('is-dragging');w.style.removeProperty('transform');w.style.removeProperty('z-index')}dragState=null;applyDashboardLayout()});
+dashboard.addEventListener('pointerdown',e=>{
+ const handle=e.target.closest('.widget-drag');
+ if(!layoutMode||!isWindowsDesktop()||!handle||e.button!==0)return;
+ const w=handle.closest('[data-widget]'),id=w?.dataset.widget;
+ if(!id)return;
+ const p=layoutPrefs.positions[id];
+ dragState={id,pointerId:e.pointerId,startX:e.clientX,startY:e.clientY,startCol:p.col,startRow:p.row,span:p.span};
+ w.classList.add('is-dragging');
+ document.documentElement.classList.add('widget-drag-active');
+ e.preventDefault();
+});
+window.addEventListener('pointermove',e=>{
+ if(!dragState||dragState.pointerId!==e.pointerId)return;
+ const w=dashboard.querySelector('[data-widget="'+dragState.id+'"]');
+ if(w){w.style.transform='translate('+(e.clientX-dragState.startX)+'px,'+(e.clientY-dragState.startY)+'px)';w.style.zIndex='6'}
+},{passive:true});
+function finishWidgetDrag(e,commit){
+ if(!dragState||e.pointerId!==undefined&&dragState.pointerId!==e.pointerId)return;
+ const s=dragState;dragState=null;
+ const w=dashboard.querySelector('[data-widget="'+s.id+'"]');
+ if(w){w.classList.remove('is-dragging');w.style.removeProperty('transform');w.style.removeProperty('z-index')}
+ document.documentElement.classList.remove('widget-drag-active');
+ if(!commit){applyDashboardLayout();return}
+ const grid=dashboard.getBoundingClientRect(),style=getComputedStyle(dashboard);
+ const gap=parseFloat(style.columnGap)||16,rowGap=parseFloat(style.rowGap)||16,rowHeight=parseFloat(style.gridAutoRows)||72;
+ const colWidth=(grid.width-gap*11)/12,rowPitch=rowHeight+rowGap;
+ const dx=Math.round((e.clientX-s.startX)/Math.max(colWidth,1)),dy=Math.round((e.clientY-s.startY)/Math.max(rowPitch,1));
+ const p=layoutPrefs.positions[s.id];
+ p.col=Math.max(1,Math.min(13-p.span,s.startCol+dx));p.row=Math.max(1,Math.min(100,s.startRow+dy));
+ savePositionChange(s.id);
+}
+window.addEventListener('pointerup',e=>finishWidgetDrag(e,true));
+window.addEventListener('pointercancel',e=>finishWidgetDrag(e,false));
+window.addEventListener('blur',()=>{if(dragState)finishWidgetDrag({pointerId:dragState.pointerId},false)});
 dashboard.addEventListener('click',e=>{if(!layoutMode||!isWindowsDesktop())return;const resize=e.target.closest('[data-resize]');if(resize){const w=resize.closest('[data-widget]'),id=w?.dataset.widget;if(!id)return;const [dimension,rawDelta]=resize.dataset.resize.split(':'),delta=Number(rawDelta),p=layoutPrefs.positions[id];if(dimension==='width'){p.span=Math.max(3,Math.min(12,p.span+delta));p.col=Math.min(p.col,13-p.span)}else p.rows=Math.max(2,Math.min(12,p.rows+delta));savePositionChange(id);return}const hide=e.target.closest('[data-hide]');if(hide){const id=hide.closest('[data-widget]').dataset.widget;layoutPrefs.hidden[id]=true;if(!widgetIds.some(x=>layoutPrefs.hidden[x]!==true)){layoutPrefs.hidden[id]=false;toast('Keep at least one dashboard widget visible.');return}applyDashboardLayout();persistLayout();toast('Widget hidden. Restore it in Theme & settings.')}});
 $$('[data-widget-visibility]').forEach(i=>i.addEventListener('change',()=>{layoutPrefs.hidden[i.value]=!i.checked;if(!widgetIds.some(x=>layoutPrefs.hidden[x]!==true)){layoutPrefs.hidden[i.value]=false;i.checked=true;toast('Keep at least one dashboard widget visible.');return}if(i.checked)keepWidgetsApart(i.value);applyDashboardLayout();persistLayout()}));
 updateWidgetPlatform();window.addEventListener('resize',()=>{clearTimeout(resizeApplyTimer);resizeApplyTimer=setTimeout(()=>{updateWidgetPlatform();applyDashboardLayout()},100)});
