@@ -39,12 +39,13 @@ async function connect(session) {
   window.orbitSync = {
     userId: session.user.id,
     userEmail: (session.user.email || "").trim().toLowerCase(),
-    userName: String(session.user.user_metadata?.full_name || session.user.user_metadata?.name || session.user.user_metadata?.nickname || "").trim(),
+    userName: String(session.user.user_metadata?.nickname || session.user.user_metadata?.full_name || session.user.user_metadata?.name || "").trim(),
     saveProfileName: async name => {
       const cleanName = String(name || "").trim().slice(0, 60);
-      const { data: updated, error } = await client.auth.updateUser({ data: { full_name: cleanName } });
+      if (!cleanName) throw new Error("Please enter a nickname.");
+      const { data: updated, error } = await client.auth.updateUser({ data: { nickname: cleanName, full_name: cleanName } });
       if (error) throw error;
-      window.orbitSync.userName = String(updated.user?.user_metadata?.full_name || "").trim();
+      window.orbitSync.userName = String(updated.user?.user_metadata?.nickname || updated.user?.user_metadata?.full_name || "").trim();
       return window.orbitSync.userName;
     },
     items: data.map(mapRow),
@@ -182,18 +183,31 @@ if (!config.supabaseUrl || !config.publishableKey) {
     button.disabled = true;
     try {
       const email = form.elements.email.value.trim(), password = form.elements.password.value;
+      const nickname = String(form.elements.nickname.value || "").trim().slice(0, 60);
+      if (form.dataset.mode === "signup" && !nickname) throw new Error("Please choose a nickname for your Daily Briefing.");
       const result = form.dataset.mode === "signup"
-        ? await client.auth.signUp({ email, password, options: { emailRedirectTo: location.href } })
+        ? await client.auth.signUp({ email, password, options: { emailRedirectTo: location.href, data: { nickname, full_name: nickname } } })
         : await client.auth.signInWithPassword({ email, password });
       if (result.error) throw result.error;
       if (form.dataset.mode === "signup" && !result.data.session) showMessage("Check your email to confirm your account, then sign in.");
-      else if (result.data.session) await ensureConnected(result.data.session);
+      else if (result.data.session) {
+        if (form.dataset.mode === "login" && nickname) {
+          const { error: nicknameError } = await client.auth.updateUser({ data: { nickname, full_name: nickname } });
+          if (nicknameError) throw nicknameError;
+        }
+        await ensureConnected(result.data.session);
+      }
     } catch (error) { showMessage(error.message || "Could not sign in. Please try again."); }
     finally { button.disabled = false; }
   });
   document.querySelector("#authMode").addEventListener("click", () => {
     const signup = form.dataset.mode !== "signup";
     form.dataset.mode = signup ? "signup" : "login";
+    const nicknameInput = document.querySelector("#authNickname");
+    document.querySelector("#authNicknameField").querySelector("label").textContent = signup ? "Nickname" : "Nickname (optional)";
+    nicknameInput.required = signup;
+    nicknameInput.placeholder = signup ? "What should Orbit call you?" : "Leave blank to keep your saved nickname";
+    if (!signup) nicknameInput.value = "";
     document.querySelector("#authSubmit").textContent = signup ? "Create account" : "Sign in";
     document.querySelector("#authTitle").textContent = signup ? "Create your account" : "Sign in to Orbit";
     document.querySelector("#authSubtitle").textContent = signup ? "A little more room for what matters." : "Pick up right where you left off.";
