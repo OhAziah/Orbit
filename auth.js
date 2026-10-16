@@ -40,6 +40,13 @@ async function connect(session) {
     userId: session.user.id,
     userEmail: (session.user.email || "").trim().toLowerCase(),
     userName: String(session.user.user_metadata?.full_name || session.user.user_metadata?.name || session.user.user_metadata?.nickname || "").trim(),
+    saveProfileName: async name => {
+      const cleanName = String(name || "").trim().slice(0, 60);
+      const { data: updated, error } = await client.auth.updateUser({ data: { full_name: cleanName } });
+      if (error) throw error;
+      window.orbitSync.userName = String(updated.user?.user_metadata?.full_name || "").trim();
+      return window.orbitSync.userName;
+    },
     items: data.map(mapRow),
     loadNotes: async () => {
       const { data, error } = await client.from("orbit_notes").select("*").order("updated_at", { ascending: false });
