@@ -19,7 +19,7 @@ Orbit is a personal dashboard for the little things you need to remember. Add a 
 - **Sync notes across devices** after applying `supabase/sql/supabase-notes-migration.sql`. Without that optional migration, notes are saved locally in the current browser and are still included in exported backups.
 - **Use it on your phone** with responsive navigation, forms, and calendar views.
 - **Get reminders while Orbit is closed** with optional push notifications on devices and browsers that support them.
-- **Keep a backup** by exporting your reminders to a JSON file and importing it later.
+- **Keep a backup** by exporting your reminders and notes to a JSON file and importing it later.
 
 ## Getting started
 
