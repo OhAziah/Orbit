@@ -162,6 +162,26 @@ aside{position:relative;min-width:0;background:var(--panel);gap:28px;transition:
 .calendar-panel .day.selected{font-weight:650}
 @media(max-width:560px){.calendar-panel .month-control{gap:4px}.calendar-panel .month-control .icon-btn{width:29px;height:29px}.calendar-panel .calendar-today{padding:4px 7px;min-height:29px}.dashboard-widgets [data-widget="agenda"] .item{gap:7px;padding:9px 0}}
 </style>
+<style id="admin-page-layout-fix">
+/* Keep the administrator overview readable without affecting dashboard widgets. */
+.admin-panel{padding:22px;min-width:0}
+.admin-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px;margin-bottom:12px}
+.admin-stats .stat{min-width:0}
+.admin-health{font-size:22px}
+.admin-table-wrap{width:100%;max-width:100%;overflow-x:auto;margin:14px 0 10px;border:1px solid var(--line);border-radius:12px;background:var(--panel);-webkit-overflow-scrolling:touch}
+.admin-table{width:100%;min-width:680px;border-collapse:collapse;text-align:left;font-size:12px}
+.admin-table th,.admin-table td{padding:13px 14px;border-bottom:1px solid var(--line);vertical-align:middle}
+.admin-table th{background:var(--bg);color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.06em;font-weight:650;white-space:nowrap}
+.admin-table tbody tr:last-child td{border-bottom:0}
+.admin-table tbody tr:hover{background:color-mix(in srgb,var(--blue) 4%,var(--panel))}
+.admin-access{display:inline-flex;align-items:center;padding:4px 9px;border-radius:999px;background:var(--green-soft);color:var(--green);font-size:11px;font-weight:650;white-space:nowrap}
+.admin-access.blocked{background:var(--red-soft,#fff0f0);color:var(--red)}
+.admin-self{color:var(--muted);font-size:11px}
+.admin-action{white-space:nowrap}
+.admin-panel>.hint{line-height:1.5}
+@media(max-width:700px){.admin-panel{padding:16px}.admin-stats{gap:8px}.admin-stats .stat{padding:13px}.admin-stats .stat-head{font-size:10px}.admin-stats .stat-num{font-size:21px}.admin-table th,.admin-table td{padding:11px 12px}}
+@media(max-width:420px){.admin-stats{grid-template-columns:minmax(0,1fr)}.admin-stats .stat{padding:14px}.admin-stats .stat-num{font-size:23px}}
+</style>
 </head>
 <body>
 <section id="authGate" class="auth-gate" hidden aria-labelledby="authTitle"><div class="auth-layout"><div class="auth-story"><div class="auth-brand"><span class="brandmark" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5.5"/><ellipse cx="12" cy="12" rx="10" ry="4.3" transform="rotate(-32 12 12)"/><circle class="orbit-mark-dot" cx="19.2" cy="6.1" r="1.35"/></svg></span><span>Orbit</span></div><div class="auth-planet" aria-hidden="true"><span></span><i></i></div><div class="auth-story-copy"><span class="auth-overline">MAKE SPACE FOR WHAT MATTERS</span><h1>Life, a little more in view.</h1><p>Keep everyday plans, reminders and monthly bills in one calm place.</p></div><div class="auth-story-foot"><span class="auth-secure-dot"></span>Private to your account <span class="auth-foot-separator">·</span> Syncs across your devices</div></div><div class="auth-form-panel"><div class="auth-mobile-brand"><span class="brandmark" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5.5"/><ellipse cx="12" cy="12" rx="10" ry="4.3" transform="rotate(-32 12 12)"/><circle class="orbit-mark-dot" cx="19.2" cy="6.1" r="1.35"/></svg></span><span>Orbit</span></div><div class="auth-form-head"><span class="auth-form-kicker">WELCOME TO ORBIT</span><h2 id="authTitle">Sign in to Orbit</h2><p id="authSubtitle">Pick up right where you left off.</p></div><form id="authForm" class="auth-form" data-mode="login"><div class="field" id="authNicknameField"><label for="authNickname">Nickname (optional)</label><input id="authNickname" name="nickname" type="text" autocomplete="nickname" maxlength="60" placeholder="Leave blank to keep your saved nickname"></div><div class="field"><label for="authEmail">Email address</label><input id="authEmail" name="email" type="email" autocomplete="email" placeholder="you@example.com" required></div><div class="field"><label for="authPassword">Password</label><input id="authPassword" name="password" type="password" autocomplete="current-password" minlength="8" placeholder="At least 8 characters" required></div><button class="primary auth-submit" id="authSubmit" type="submit">Sign in</button></form><div class="auth-switch"><span id="authSwitchPrompt">New to Orbit?</span><button class="auth-mode" id="authMode" type="button">Create an account</button></div><p id="authMessage" class="auth-message" role="status" aria-live="polite"></p><div class="auth-form-foot"><span class="auth-lock" aria-hidden="true">⌑</span>Your reminders stay private and sync securely.</div></div></div></section>
